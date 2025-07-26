@@ -1,0 +1,53 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  preferredLanguage: String!
+  email: String
+  location: String
+}
+
+type Crop @table {
+  name: String!
+  scientificName: String
+  category: String
+}
+
+type Disease @table {
+  name: String!
+  description: String!
+  symptoms: String
+  treatmentRecommendations: String
+  preventionMeasures: String
+}
+
+type QueryLog @table {
+  user: User!
+  queryType: String! # Represents the enum: DISEASE_DIAGNOSIS, MARKET_PRICE_QUERY, SCHEME_INFO_QUERY, GENERAL_QUERY
+  timestamp: Timestamp!
+  rawInput: String!
+  imageURL: String
+  aiResponseText: String
+  relatedCrop: Crop
+  diagnosedDisease: Disease
+  confidenceScore: Float
+  requestedMarketLocation: String
+  requestedSchemeName: String
+}
+
+type MarketDataPoint @table {
+  crop: Crop!
+  price: Float!
+  unit: String!
+  marketLocation: String!
+  timestamp: Timestamp!
+  source: String
+}
+
+type GovernmentScheme @table {
+  name: String!
+  description: String!
+  eligibilityCriteria: String
+  benefits: String
+  applicationProcess: String
+  targetRegion: String
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "672454533907",
+    "project_id": "project-kisan-32118",
+    "storage_bucket": "project-kisan-32118.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672454533907:android:3a45adc855e71ab3c3b0e6",
+        "android_client_info": {
+          "package_name": "com.example.project_kisan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA121T3d7z-pk4vq1-ZAY98d_RuQ4toO2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

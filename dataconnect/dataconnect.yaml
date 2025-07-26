@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "project_kisan"
+location: "asia-south1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "project_kisan-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
