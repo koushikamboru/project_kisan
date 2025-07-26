@@ -27,30 +27,42 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
   }
 
   Future<void> _setupCameras() async {
-    // Get the list of available cameras.
-    _cameras = await availableCameras();
-    // Initialize the camera with the first camera in the list (usually the back camera).
-    await _initializeCamera(_selectedCameraIndex);
+    try {
+      _cameras = await availableCameras();
+      if (_cameras.isNotEmpty) {
+        await _initializeCamera(_selectedCameraIndex);
+      } else {
+        setState(() {
+          _controller = null;
+        });
+      }
+    } catch (e) {
+      print('Error initializing cameras: $e');
+      setState(() {
+        _controller = null;
+      });
+    }
   }
 
   Future<void> _initializeCamera(int cameraIndex) async {
-    // If there's an existing controller, dispose of it first.
-    if (_controller != null) {
-      await _controller!.dispose();
-    }
-
-    // Create a new CameraController.
-    _controller = CameraController(
-      _cameras[cameraIndex],
-      ResolutionPreset.high,
-    );
-
-    // Initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller!.initialize();
-
-    // Update the state to rebuild the widget with the new camera preview.
-    if (mounted) {
-      setState(() {});
+    try {
+      if (_controller != null) {
+        await _controller!.dispose();
+      }
+      _controller = CameraController(
+        _cameras[cameraIndex],
+        ResolutionPreset.high,
+      );
+      _initializeControllerFuture = _controller!.initialize();
+      await _initializeControllerFuture;
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print('Error initializing camera: $e');
+      setState(() {
+        _controller = null;
+      });
     }
   }
 
@@ -62,13 +74,14 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
 
   void _onTakePicture() async {
     try {
+      if (_controller == null || !_controller!.value.isInitialized) return;
       await _initializeControllerFuture;
       final image = await _controller!.takePicture();
       setState(() {
         _capturedImage = image;
       });
     } catch (e) {
-      print(e);
+      print('Error taking picture: $e');
     }
   }
 
@@ -79,13 +92,13 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
   }
 
   void _onConfirmPicture() {
-    // TODO: Implement logic to use the confirmed image.
+    if (_capturedImage == null) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Image confirmed! Path: ${_capturedImage!.path}')),
+      SnackBar(content: Text('Crop scanned! Path: ${_capturedImage!.path}')),
     );
+    // TODO: Implement crop diagnosis logic here
   }
 
-  // New function to handle picking an image from the gallery.
   void _onPickImageFromGallery() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -95,16 +108,14 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
         });
       }
     } catch (e) {
-      print(e);
+      print('Error picking image: $e');
     }
   }
 
-  // New function to handle flipping the camera.
-  void _onFlipCamera() {
+  void _onFlipCamera() async {
     if (_cameras.length > 1) {
-      // Cycle through the available cameras.
       _selectedCameraIndex = (_selectedCameraIndex + 1) % _cameras.length;
-      _initializeCamera(_selectedCameraIndex);
+      await _initializeCamera(_selectedCameraIndex);
     }
   }
 
@@ -113,7 +124,7 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Crop Diagnosis'),
+        title: const Text('Scan Crop'),
         backgroundColor: Colors.grey[100],
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -159,14 +170,12 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
             _capturedImage != null
                 ? _buildImagePreview()
                 : _buildCameraPreview(),
-
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               color: Colors.grey[200],
-              child:
-                  _capturedImage != null
-                      ? _buildImageControls()
-                      : _buildCameraControls(),
+              child: _capturedImage != null
+                  ? _buildImageControls()
+                  : _buildCameraControls(),
             ),
           ],
         ),
@@ -175,19 +184,20 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
   }
 
   Widget _buildCameraPreview() {
-    return FutureBuilder<void>(
-      future: _initializeControllerFuture,
-      builder: (context, snapshot) {
-        if (_controller == null || !_controller!.value.isInitialized) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(80.0),
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-        return CameraPreview(_controller!);
-      },
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(80.0),
+          child: Text(
+            'Camera not available',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+        ),
+      );
+    }
+    return AspectRatio(
+      aspectRatio: _controller!.value.aspectRatio,
+      child: CameraPreview(_controller!),
     );
   }
 
@@ -196,6 +206,7 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
       File(_capturedImage!.path),
       fit: BoxFit.cover,
       width: double.infinity,
+      height: 300,
     );
   }
 
@@ -205,20 +216,20 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
       children: [
         IconButton(
           icon: const Icon(Icons.photo_library_outlined, size: 30),
-          onPressed: _onPickImageFromGallery, // UPDATED
+          onPressed: _onPickImageFromGallery,
         ),
         ElevatedButton(
           onPressed: _onTakePicture,
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
             padding: const EdgeInsets.all(20),
-            backgroundColor: Colors.grey[800],
+            backgroundColor: Colors.green[700],
           ),
           child: const Icon(Icons.camera, color: Colors.white),
         ),
         IconButton(
           icon: const Icon(Icons.flip_camera_ios_outlined, size: 30),
-          onPressed: _onFlipCamera, // UPDATED
+          onPressed: _onFlipCamera,
         ),
       ],
     );
@@ -236,7 +247,7 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
         ),
         ElevatedButton.icon(
           icon: const Icon(Icons.check),
-          label: const Text('Confirm'),
+          label: const Text('Scan Crop'),
           onPressed: _onConfirmPicture,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green[700],
@@ -250,7 +261,6 @@ class _CameraViewScreenState extends State<CameraViewScreen> {
     );
   }
 
-  // ... All other helper widgets (_buildSectionHeader, etc.) remain the same
   Widget _buildSectionHeader(String title) {
     return Text(
       title,

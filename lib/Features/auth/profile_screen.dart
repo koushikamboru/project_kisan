@@ -1,7 +1,7 @@
 // lib/Features/auth/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Kisan/Features/auth/screens/login_screen.dart';
+import '../../Features/auth/screens/phone_auth_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

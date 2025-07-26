@@ -1,9 +1,9 @@
 // lib/Features/splash/screens/splash_screen.dart
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:Kisan/Features/dashboard/screens/main_navigation_screen.dart'; // UPDATED import
-import 'package:Kisan/Features/auth/screens/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Features/dashboard/screens/main_navigation_screen.dart';
+import '../Features/auth/screens/phone_auth_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,20 +28,18 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
-    Timer(const Duration(seconds: 5), () async {
-      if (mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-        if (isLoggedIn) {
-          // UPDATED: Navigate to the new main navigation screen
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-          );
-        } else {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-          );
-        }
+    Timer(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      final prefs = await SharedPreferences.getInstance();
+      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+      if (isLoggedIn) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => PhoneAuthScreen()),
+        );
       }
     });
   }
@@ -61,12 +59,16 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Ensure you have a logo at this path in your assets folder
               Image.asset('lib/assets/logo.png', width: 150, height: 150),
               const SizedBox(height: 20),
               const Text(
                 'Project Kisan',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 30),
+              // Smooth loading indicator
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
               ),
             ],
           ),
