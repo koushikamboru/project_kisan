@@ -18,7 +18,7 @@ class ProfileScreen extends StatelessWidget {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Confirm Logout'),
-          content: const SingleChildScrollView(
+          content: const SingleChildScrollView(// User must tap a button
             child: ListBody(
               children: <Widget>[Text('Are you sure you want to log out?')],
             ),
@@ -39,8 +39,8 @@ class ProfileScreen extends StatelessWidget {
 
                 // Close the dialog and navigate to the login screen
                 Navigator.of(dialogContext).pop();
-                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => PhoneAuthScreen()),
                   (Route<dynamic> route) => false,
                 );
               },
@@ -149,11 +149,10 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       // UPDATED: Conditionally hide the trailing icon for the logout button
-      trailing:
-          isLogout
-              ? null
-              : const Icon(
-                Icons.arrow_forward_ios,
+      trailing: isLogout 
+          ? null
+          : const Icon(
+              Icons.arrow_forward_ios,
                 size: 16,
                 color: Colors.grey,
               ),
@@ -245,10 +244,10 @@ class ProfileScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
+            children: [
               Icon(Icons.agriculture, color: primaryGreen),
-              SizedBox(width: 8),
-              Text(
+              const SizedBox(width: 8),
+              const Text(
                 'Farm Details',
                 style: TextStyle(
                   fontSize: 16,

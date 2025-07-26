@@ -1,10 +1,10 @@
 // lib/Features/dashboard/screens/main_navigation_screen.dart
 import 'package:flutter/material.dart';
-import 'package:Kisan/Features/auth/screens/profile_screen.dart';
-import 'package:Kisan/Features/dashboard/screens/dashboard_screen.dart';
-import 'package:Kisan/Features/diagnosis/screens/camera_view_screen.dart';
+import '../../../Features/auth/profile_screen.dart';
+import '../../../Features/dashboard/screens/dashboard_screen.dart';
+import '../../../Features/disease_diagnosis/camera_view_screen.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:Kisan/Features/market_prices/screens/market_prices_screen.dart';
+import '../../../Features/market_prices/market_prices_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -17,9 +17,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const DashboardScreen(),
+    DashboardScreen(),
     const CameraViewScreen(),
-    const Center(child: Text('Market Page')),
+    MarketPricesScreen(), // FIXED: Use actual MarketPricesScreen
     const ProfileScreen(),
   ];
 
@@ -30,18 +30,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   Widget _getCurrentPage() {
-    switch (_currentIndex) {
-      case 0:
-        return _pages[0];
-      case 1:
-        return _pages[1];
-      case 3:
-        return _pages[2];
-      case 4:
-        return _pages[3];
-      default:
-        return _pages[0];
+    // FIXED: Use _currentIndex directly, fallback to DashboardScreen
+    if (_currentIndex >= 0 && _currentIndex < _pages.length) {
+      return _pages[_currentIndex];
     }
+    return _pages[0];
   }
 
   @override
@@ -49,7 +42,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       body: _getCurrentPage(),
       floatingActionButton: SpeedDial(
-        // UPDATED: The main icon is now a menu icon. It will toggle the menu.
         icon: Icons.menu,
         activeIcon: Icons.close,
         backgroundColor: Colors.green[800],
@@ -71,18 +63,13 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           SpeedDialChild(
             child: const Icon(Icons.storefront),
             label: 'Market',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const MarketPricesScreen()),
-              );
-            },
+            onTap: () => _onItemTapped(2), // FIXED: Use tab index
           ),
           SpeedDialChild(
             child: const Icon(Icons.person),
             label: 'Profile',
-            onTap: () => _onItemTapped(4),
+            onTap: () => _onItemTapped(3), // FIXED: Use tab index
           ),
-          // ADDED: The "Voice" action is now an option within the menu.
           SpeedDialChild(
             child: const Icon(Icons.mic),
             label: 'Voice',
@@ -93,8 +80,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             },
           ),
         ],
-        // REMOVED: The 'onPress' property was removed from here to allow the
-        // default open/close behavior.
       ),
     );
   }

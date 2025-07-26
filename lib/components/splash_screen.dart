@@ -66,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen>
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 30),
-              // Smooth loading indicator
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
               ),
