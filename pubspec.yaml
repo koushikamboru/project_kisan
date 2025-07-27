@@ -39,7 +39,7 @@ flutter:
 
   assets:
     # - config/project-kisan-32118-6d3176509bf5.json
-    - lib/assets/logo.png
+    - lib/assets/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

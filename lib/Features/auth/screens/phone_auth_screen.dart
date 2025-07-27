@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import '../../dashboard/screens/main_navigation_screen.dart';
 
 class PhoneAuthScreen extends StatefulWidget {
   @override
@@ -50,7 +51,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       setState(() => _status = 'Test login successful!');
-      Navigator.of(context).pushReplacementNamed('/main'); // Update route as needed
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MainNavigationScreen()),
+      );
       return;
     }
     final credential = PhoneAuthProvider.credential(
@@ -62,7 +65,9 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       setState(() => _status = 'Phone number verified!');
-      Navigator.of(context).pushReplacementNamed('/main'); // Update route as needed
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MainNavigationScreen()),
+      );
     } catch (e) {
       setState(() => _status = 'Invalid OTP.');
     }
@@ -85,55 +90,60 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 32),
-                // Country flag and code
-                Row(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/flags/in.png', // Add this asset for India flag
-                      width: 32,
-                      height: 32,
+                      'lib/assets/logo.png', // India flag
+                      width: 160,
+                      height: 160,
                     ),
-                    const SizedBox(width: 8),
-                    Text('+91', style: TextStyle(fontSize: fieldFontSize)),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 180,
-                      child: TextField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(10),
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: InputDecoration(
-                          hintText: 'Phone number',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 18,
-                            horizontal: 20,
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('+91', style: TextStyle(fontSize: fieldFontSize)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 180,
+                          child: TextField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(10),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: InputDecoration(
+                              hintText: 'Phone number',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 18,
+                                horizontal: 20,
+                              ),
+                            ),
+                            style: TextStyle(fontSize: fieldFontSize),
                           ),
                         ),
-                        style: TextStyle(fontSize: fieldFontSize),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 220,
+                      child: ElevatedButton(
+                        onPressed: _sendCode,
+                        child: Text(
+                          'Send OTP',
+                          style: TextStyle(
+                            fontSize: buttonFontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: 220,
-                  child: ElevatedButton(
-                    onPressed: _sendCode,
-                    child: Text(
-                      'Send OTP',
-                      style: TextStyle(
-                        fontSize: buttonFontSize,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                 ),
                 if (_codeSent) ...[
                   const SizedBox(height: 24),
