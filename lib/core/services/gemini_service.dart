@@ -1,55 +1,38 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'dart:io';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'config_service.dart';
 
 class GeminiService {
-  String? _endpoint;
-  String? _projectId;
-  final String _apiKey = 'AIzaSyBpgo4ZxILvBHKtmzSNngP_LnJupLN4EG0'; 
+  static final GenerativeModel _model = GenerativeModel(
+    model: 'gemini-pro-vision',
+    apiKey: ConfigService.apiKey,
+  );
 
-  Future<void> init() async {
-    _projectId = await ConfigService.getProjectId();
-    const location = 'us-central1';
-    _endpoint =
-        'https://vertexai.googleapis.com/v1/projects/$_projectId/locations/$location/publishers/google/models/gemini:predict';
-  }
-
-  Future<String> diagnoseDisease(String imagePath) async {
-    if (_endpoint == null) await init();
-
-    final uri = Uri.parse('$_endpoint?key=$_apiKey');
-
-    final imageBytes = await _imageToBase64(imagePath);
-
-    final requestBody = {
-      "instances": [
-        {
-          "prompt": "Diagnose the plant disease from this image",
-          "image": {
-            "bytesBase64Encoded": imageBytes,
-          }
-        }
-      ]
-    };
-
-    final response = await http.post(
-      uri,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(requestBody),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['predictions'][0]['content']; // Update if the response differs
-    } else {
-      return 'Error: ${response.statusCode} - ${response.body}';
+  static Future<String> getResponse(String query) async {
+    try {
+      final response = await _model.generateContent([
+        Content.text(query),
+      ]);
+      return response.text ?? 'No response from API.';
+    } catch (e) {
+      return "Error: Failed to get response from API. $e";
     }
   }
 
-  Future<String> _imageToBase64(String imagePath) async {
-    final bytes = await http.readBytes(Uri.file(imagePath));
-    return base64Encode(bytes);
+  static Future<String> diagnoseDisease(String imagePath) async {
+    try {
+      final prompt =
+          TextPart("Identify the disease in the following crop image. Provide the disease name, symptoms, and recommended treatment.");
+      final image = File(imagePath);
+      final imageBytes = await image.readAsBytes();
+      final imagePart = DataPart('image/jpeg', imageBytes);
+
+      final response = await _model.generateContent([
+        Content.multi([prompt, imagePart])
+      ]);
+      return response.text ?? 'No response from API.';
+    } catch (e) {
+      return "Error: Failed to get response from API. $e";
+    }
   }
 }

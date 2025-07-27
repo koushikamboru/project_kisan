@@ -1,4 +1,3 @@
-// lib/Features/dashboard/screens/main_navigation_screen.dart
 import 'package:flutter/material.dart';
 import '../../../Features/auth/profile_screen.dart';
 import '../../../Features/dashboard/screens/dashboard_screen.dart';
@@ -19,7 +18,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _pages = [
     DashboardScreen(),
     const CameraViewScreen(),
-    MarketPricesScreen(), // FIXED: Use actual MarketPricesScreen
+    MarketPricesScreen(),
     const ProfileScreen(),
   ];
 
@@ -29,18 +28,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  Widget _getCurrentPage() {
-    // FIXED: Use _currentIndex directly, fallback to DashboardScreen
-    if (_currentIndex >= 0 && _currentIndex < _pages.length) {
-      return _pages[_currentIndex];
-    }
-    return _pages[0];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getCurrentPage(),
+      body: _pages[_currentIndex],
       floatingActionButton: SpeedDial(
         icon: Icons.menu,
         activeIcon: Icons.close,
@@ -56,19 +47,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onTap: () => _onItemTapped(0),
           ),
           SpeedDialChild(
-            child: const Icon(Icons.qr_code_scanner),
+            child: const Icon(Icons.camera_alt),
             label: 'Scan',
             onTap: () => _onItemTapped(1),
           ),
           SpeedDialChild(
             child: const Icon(Icons.storefront),
             label: 'Market',
-            onTap: () => _onItemTapped(2), // FIXED: Use tab index
+            onTap: () => _onItemTapped(2),
           ),
           SpeedDialChild(
             child: const Icon(Icons.person),
             label: 'Profile',
-            onTap: () => _onItemTapped(3), // FIXED: Use tab index
+            onTap: () => _onItemTapped(3),
           ),
           SpeedDialChild(
             child: const Icon(Icons.mic),
